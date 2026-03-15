@@ -1,0 +1,173 @@
+# ==========================================
+#          Day 1: Linux Fundamentals
+# ==========================================
+
+
+# Task 1: Create a directory structure for a project
+# ------------------------------------------
+
+# 1. Create the main project directory
+mkdir my_project
+
+# 2. Navigate into the newly created project directory
+cd my_project
+
+# 3. Create the standard subdirectories (src, docs, tests)
+mkdir src docs tests
+
+# 4. Create the specified files inside their respective directories
+touch docs/syteminfo
+touch tests/dummy-data
+touch README.txt
+
+# Verify the structure was created successfully (requires 'tree' command to be installed) Or simply use ls -R
+ls -R
+
+
+
+# Task 2: Practice all the commands learned today
+# ------------------------------------------
+
+# Navigation & Directory Operations
+pwd                          # Print the absolute path of the current working directory
+ls -la                       # List all files (including hidden) in detailed long format
+cd ~                         # Return to the user's home directory
+cd -                         # Switch back to the previous directory
+
+# File Creation & Manipulation
+touch practice_file.txt                     # Create an empty text file
+echo "Hello DevOps" > practice_file.txt     # Write initial text to the file
+echo "Learning Linux" >> practice_file.txt  # Append new text without overwriting
+cp practice_file.txt backup_file.txt        # Copy the file to a new destination
+mv backup_file.txt old_backup.txt           # Rename the copied file
+rm old_backup.txt                           # Delete the renamed file permanently
+
+# Viewing File Contents
+cat practice_file.txt        # Display the entire content of the file
+head -n 1 practice_file.txt  # Display only the first line of the file
+tail -n 1 practice_file.txt  # Display only the last line of the file
+
+# System Information Exploration
+uname -a                     # Print comprehensive system information (kernel, OS, architecture)
+whoami                       # Display the currently logged-in username
+df -h                        # Check disk space usage in a human-readable format
+du -sh *                     # Calculate and display the size of files/folders in the current directory
+
+
+
+# Task 3: Read the manual page for 'ls' command
+# ------------------------------------------
+
+# Open the manual documentation for 'ls' to explore available flags and options
+man ls
+
+
+# Task 4: Explore the system's /etc directory (read-only)
+# ------------------------------------------
+
+# Navigate to the /etc directory where system-wide configuration files are stored
+cd /etc
+
+# List all configuration files and directories to explore the structure
+ls -la
+
+# Safely view the contents of a specific configuration file (e.g., OS release info)
+cat os-release
+
+
+
+#====================================================================
+#                       TERMINAL EXECUTION LOG
+#====================================================================
+
+moaz@Linux:~/Desktop/assignments/Linux$ mkdir my_project
+moaz@Linux:~/Desktop/assignments/Linux$ cd my_project
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ mkdir src docs tests
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ touch docs/syteminfo
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ touch tests/dummy-data
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ touch README.txt
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ ls -R
+.:
+docs  README.txt  src  tests
+
+./docs:
+syteminfo
+
+./src:
+
+./tests:
+dummy-data
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ pwd
+/home/moaz/Desktop/assignments/Linux/my_project
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ ls -la
+total 20
+drwxrwxr-x 5 moaz moaz 4096 Mar 15 14:50 .
+drwxrwxr-x 3 moaz moaz 4096 Mar 15 14:50 ..
+drwxrwxr-x 2 moaz moaz 4096 Mar 15 14:50 docs
+-rw-rw-r-- 1 moaz moaz    0 Mar 15 14:50 README.txt
+drwxrwxr-x 2 moaz moaz 4096 Mar 15 14:50 src
+drwxrwxr-x 2 moaz moaz 4096 Mar 15 14:50 tests
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ cd ~
+moaz@Linux:~$ cd -
+/home/moaz/Desktop/assignments/Linux/my_project
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ touch practice_file.txt
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ echo "Hello DevOps" > practice_file.txt
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ echo "Learning Linux" >> practice_file.txt
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ cp practice_file.txt backup_file.txt
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ mv backup_file.txt old_backup.txt
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ rm old_backup.txt
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ cat practice_file.txt
+Hello DevOps
+Learning Linux
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ head -n 1 practice_file.txt
+Hello DevOps
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ tail -n 1 practice_file.txt
+Learning Linux
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ uname -a
+Linux Linux 5.15.0-84-generic #93-Ubuntu SMP Tue Sep 5 17:16:10 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ whoami
+moaz
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           393M  1.1M  392M   1% /run
+/dev/sda2        20G  8.5G   11G  46% /
+tmpfs           2.0G     0  2.0G   0% /dev/shm
+/dev/sda1       511M  6.1M  505M   2% /boot/efi
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ du -sh *
+4.0K    docs
+4.0K    practice_file.txt
+0       README.txt
+4.0K    src
+4.0K    tests
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ man ls
+# (Manual page opened and exited)
+
+moaz@Linux:~/Desktop/assignments/Linux/my_project$ cd /etc
+moaz@Linux:/etc$ cat os-release
+PRETTY_NAME="Ubuntu 22.04.3 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.3 LTS (Jammy Jellyfish)"
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=jammy
+
+moaz@Linux:/etc$ cd ~/Desktop/assignments/Linux
+moaz@Linux:~/Desktop/assignments/Linux$

@@ -1,0 +1,63 @@
+# ==========================================
+# Day 3: Text Processing & File Operations
+# ==========================================
+
+# Part A: Finding Logs and Processing Errors
+#------------------------------------------
+
+# 1. Write commands that find .log files, search for "error", and save to error_report.txt
+# Using find with exec and grep (Suppressing permission denied errors with 2>/dev/null)
+find /var/log -type f -name "*.log" -exec grep -i "error" {} + 2>/dev/null > error_report.txt
+
+# Alternative single-line using grep recursively:
+# grep -ri "error" /var/log/*.log 2>/dev/null > error_report.txt
+
+
+# Part B: Practice Vim
+#------------------------------------------
+
+# 2. Practice vim by creating and editing a file
+# Open a new file in vim
+vim my_vim_practice.txt
+
+# Inside Vim (These are the keystrokes used, not terminal commands):
+# i                       -> Enter Insert mode
+# "Learning Vim is hard but worth it!" -> Type some text
+# Esc                     -> Return to Normal mode
+# yy                      -> Copy the line
+# p                       -> Paste the line below
+# :wq                     -> Save and exit
+
+
+# Part C: Create a Tar Backup
+#------------------------------------------
+
+# 3. Create a backup of important files using tar
+# Create a dummy directory with some files to back up
+mkdir important_data
+touch important_data/config.yaml important_data/database.sql
+
+# Create a compressed tarball archive of the directory
+tar -czvf important_data_backup.tar.gz important_data/
+
+# Verify the archive was created successfully by listing its contents
+tar -tvf important_data_backup.tar.gz
+
+
+# Part D: Experimenting with Permissions
+#------------------------------------------
+
+# 4. Experiment with different permission combinations
+touch secret_doc.txt
+
+# Give owner full access, group read/execute, and others no access (750)
+chmod 750 secret_doc.txt
+
+# Give everyone read access, but only owner can write (644)
+chmod 644 secret_doc.txt
+
+# Give full access to everyone (777 - DANGEROUS, only for testing)
+chmod 777 secret_doc.txt
+
+# Remove all permissions for everyone except read for the owner (400 - Very Secure)
+chmod 400 secret_doc.txt

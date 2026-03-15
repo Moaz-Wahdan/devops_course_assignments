@@ -1,0 +1,186 @@
+# ==========================================
+#      Day 2: User and Group Management
+# ==========================================
+
+# Part A: User Creation and Management
+# ------------------------------------------
+
+# 1. Create three new users
+sudo adduser alice                             # Interactive creation
+sudo adduser --home /opt/users/bob bob         # Custom home directory
+sudo adduser --system charlie                  # System user
+
+# 2. Set passwords for alice and bob
+sudo passwd alice
+sudo passwd bob
+sudo passwd -e alice                           # Force password change at next login
+
+# 3. View user information
+grep alice /etc/passwd                         # Display alice's entry
+sudo chage -l bob                              # Show bob's password aging info
+
+
+# Part B: Group Management
+# ------------------------------------------
+
+# 4. Create two groups
+sudo addgroup developers
+sudo addgroup project-team
+
+# 5. Add users to groups
+sudo usermod -aG developers,project-team alice # Add alice to both groups
+sudo usermod -aG developers bob                # Add bob to developers
+sudo usermod -g developers alice               # Make developers alice's primary group
+
+# 6. Verify group memberships
+groups alice                                   # Show alice's groups
+id bob                                         # Display bob's UID and GID
+
+
+# Part C: File Permissions and Ownership
+# ------------------------------------------
+
+# 7. Create test files and directories
+mkdir /tmp/lab1_test
+echo "Important project data" > /tmp/lab1_test/data.txt
+touch /tmp/lab1_test/script.sh
+
+# 8. Set permissions using symbolic notation
+chmod u=rw,g=r,o=r /tmp/lab1_test/data.txt     # rw-r--r--
+chmod u=rwx,go=rx /tmp/lab1_test/script.sh     # rwxr-xr-x
+
+# 9. Change ownership
+sudo chown alice:developers /tmp/lab1_test/data.txt
+# Note: Executing recursive chown on the directory after the file will overwrite the file's ownership.
+sudo chown -R bob:project-team /tmp/lab1_test
+
+
+# Part D: Verification and Testing
+# ------------------------------------------
+
+# 10. Test permissions (Switching user)
+sudo su - alice
+cat /tmp/lab1_test/data.txt                    # Alice can read (Others have read permission)
+/tmp/lab1_test/script.sh                       # Alice can execute (Others have execute permission)
+exit                                           # Return to moaz
+
+# 11. Display final state
+ls -la /tmp/lab1_test                          # Show permissions and ownership
+groups alice bob charlie                       # Show group memberships for all created users
+
+
+
+
+#====================================================================
+#                       TERMINAL EXECUTION LOG
+#====================================================================
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo adduser alice
+Adding user `alice' ...
+Adding new group `alice' (1001) ...
+Adding new user `alice' (1001) with group `alice' ...
+Creating home directory `/home/alice' ...
+Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for alice
+Enter the new value, or press ENTER for the default
+	Full Name []: Alice User
+	Room Number []: 
+	Work Phone []: 
+	Home Phone []: 
+	Other []: 
+Is the information correct? [Y/n] Y
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo adduser --home /opt/users/bob bob
+Adding user `bob' ...
+Adding new group `bob' (1002) ...
+Adding new user `bob' (1002) with group `bob' ...
+Creating home directory `/opt/users/bob' ...
+Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for bob
+	Full Name []: Bob User
+Is the information correct? [Y/n] Y
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo adduser --system charlie
+Adding system user `charlie' (UID 114) ...
+Adding new user `charlie' (UID 114) with group `nogroup' ...
+Creating home directory `/home/charlie' ...
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo passwd alice
+New password: 
+Retype new password: 
+passwd: password updated successfully
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo passwd bob
+New password: 
+Retype new password: 
+passwd: password updated successfully
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo passwd -e alice
+passwd: password expiry information changed.
+
+moaz@Linux:~/Desktop/assignments/Linux$ grep alice /etc/passwd
+alice:x:1001:1001:Alice User,,,:/home/alice:/bin/bash
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo chage -l bob
+Last password change					: Mar 15, 2026
+Password expires					: never
+Password inactive					: never
+Account expires						: never
+Minimum number of days between password change		: 0
+Maximum number of days between password change		: 99999
+Number of days of warning before password expires	: 7
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo addgroup developers
+Adding group `developers' (GID 1003) ...
+Done.
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo addgroup project-team
+Adding group `project-team' (GID 1004) ...
+Done.
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo usermod -aG developers,project-team alice
+moaz@Linux:~/Desktop/assignments/Linux$ sudo usermod -aG developers bob
+moaz@Linux:~/Desktop/assignments/Linux$ sudo usermod -g developers alice
+
+moaz@Linux:~/Desktop/assignments/Linux$ groups alice
+alice : developers project-team
+
+moaz@Linux:~/Desktop/assignments/Linux$ id bob
+uid=1002(bob) gid=1002(bob) groups=1002(bob),1003(developers)
+
+moaz@Linux:~/Desktop/assignments/Linux$ mkdir /tmp/lab1_test
+moaz@Linux:~/Desktop/assignments/Linux$ echo "Important project data" > /tmp/lab1_test/data.txt
+moaz@Linux:~/Desktop/assignments/Linux$ touch /tmp/lab1_test/script.sh
+
+moaz@Linux:~/Desktop/assignments/Linux$ chmod u=rw,g=r,o=r /tmp/lab1_test/data.txt
+moaz@Linux:~/Desktop/assignments/Linux$ chmod u=rwx,go=rx /tmp/lab1_test/script.sh
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo chown alice:developers /tmp/lab1_test/data.txt
+moaz@Linux:~/Desktop/assignments/Linux$ sudo chown -R bob:project-team /tmp/lab1_test
+
+moaz@Linux:~/Desktop/assignments/Linux$ sudo su - alice
+alice@Linux:~$ cat /tmp/lab1_test/data.txt
+Important project data
+alice@Linux:~$ /tmp/lab1_test/script.sh
+alice@Linux:~$ exit
+logout
+
+moaz@Linux:~/Desktop/assignments/Linux$ ls -la /tmp/lab1_test
+total 12
+drwxr-xr-x  2 bob project-team 4096 Mar 15 15:05 .
+drwxrwxrwt 16 root root        4096 Mar 15 15:05 ..
+-rw-r--r--  1 bob project-team   23 Mar 15 15:05 data.txt
+-rwxr-xr-x  1 bob project-team    0 Mar 15 15:05 script.sh
+
+moaz@Linux:~/Desktop/assignments/Linux$ groups alice bob charlie
+alice : developers project-team
+bob : bob developers
+charlie : nogroup
+
+moaz@Linux:~/Desktop/assignments/Linux$
