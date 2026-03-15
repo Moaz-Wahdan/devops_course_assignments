@@ -1,0 +1,13 @@
+=== Employee Report ===
+Total Employees: 15
+Average Age: 27.9
+Average Salary: 47933
+
+Employees per City:
+Alexandria: 3
+Giza: 3
+Mansoura: 3
+Cairo: 6
+
+Highest Salary: 70000
+Lowest Salary: 15000

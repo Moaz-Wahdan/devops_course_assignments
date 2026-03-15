@@ -1,63 +1,167 @@
 # ==========================================
-# Day 3: Text Processing & File Operations
+#    Day 3: Text Processing Assignment
 # ==========================================
 
-# Part A: Finding Logs and Processing Errors
-#------------------------------------------
+# Step 1: Create the Data File
+# (Created employees.csv using cat and EOF)
 
-# 1. Write commands that find .log files, search for "error", and save to error_report.txt
-# Using find with exec and grep (Suppressing permission denied errors with 2>/dev/null)
-find /var/log -type f -name "*.log" -exec grep -i "error" {} + 2>/dev/null > error_report.txt
+# Task A: Basic Information Extraction
+# ------------------------------------------
 
-# Alternative single-line using grep recursively:
-# grep -ri "error" /var/log/*.log 2>/dev/null > error_report.txt
+# 1. Display all employees from Cairo
+grep "Cairo" employees.csv
+# Or using awk: awk -F',' '$4 == "Cairo"' employees.csv
 
+# 2. Count how many employees work as Developers
+grep -c "Developer" employees.csv
 
-# Part B: Practice Vim
-#------------------------------------------
-
-# 2. Practice vim by creating and editing a file
-# Open a new file in vim
-vim my_vim_practice.txt
-
-# Inside Vim (These are the keystrokes used, not terminal commands):
-# i                       -> Enter Insert mode
-# "Learning Vim is hard but worth it!" -> Type some text
-# Esc                     -> Return to Normal mode
-# yy                      -> Copy the line
-# p                       -> Paste the line below
-# :wq                     -> Save and exit
+# 3. Show only the names and salaries of all employees
+awk -F',' '{print $1, $5}' employees.csv
+# Or using cut: cut -d',' -f1,5 employees.csv
 
 
-# Part C: Create a Tar Backup
-#------------------------------------------
+# Task B: Data Sorting and Filtering
+# ------------------------------------------
 
-# 3. Create a backup of important files using tar
-# Create a dummy directory with some files to back up
-mkdir important_data
-touch important_data/config.yaml important_data/database.sql
+# 4. Sort all employees by salary (highest to lowest) and save to high_earners.txt
+# -t',' sets the delimiter to comma, -k5 sorts by the 5th column, -nr means numeric and reverse (descending)
+sort -t',' -k5 -nr employees.csv > high_earners.txt
 
-# Create a compressed tarball archive of the directory
-tar -czvf important_data_backup.tar.gz important_data/
-
-# Verify the archive was created successfully by listing its contents
-tar -tvf important_data_backup.tar.gz
+# 5. Display employees aged between 25 and 30 (inclusive)
+awk -F',' '$2 >= 25 && $2 <= 30' employees.csv
 
 
-# Part D: Experimenting with Permissions
-#------------------------------------------
+# Task C: Advanced Text Processing
+# ------------------------------------------
 
-# 4. Experiment with different permission combinations
-touch secret_doc.txt
+# 7. Calculate the average salary of all employees
+awk -F',' '{sum += $5} END {print sum/NR}' employees.csv
 
-# Give owner full access, group read/execute, and others no access (750)
-chmod 750 secret_doc.txt
+# 8. Count how many employees work in each city
+awk -F',' '{count[$4]++} END {for (city in count) print city ": " count[city]}' employees.csv
 
-# Give everyone read access, but only owner can write (644)
-chmod 644 secret_doc.txt
+# 9. Find the highest-paid employee in each job position
+# First sort by salary descending, then use awk to only print the first time it sees a specific position
+sort -t',' -k5 -nr employees.csv | awk -F',' '!seen[$3]++'
 
-# Give full access to everyone (777 - DANGEROUS, only for testing)
-chmod 777 secret_doc.txt
 
-# Remove all permissions for everyone except read for the owner (400 - Very Secure)
-chmod 400 secret_doc.txt
+# Task D: Data Modification
+# ------------------------------------------
+
+# 10. Change "Developer" to "Software Engineer"
+sed 's/Developer/Software Engineer/g' employees.csv > updated_employees.csv
+
+# 11. Add a header row to data
+sed '1iName,Age,Position,City,Salary' employees.csv > employees_with_header.csv
+
+
+# Task E: Reporting
+# ------------------------------------------
+
+# 12. Create a comprehensive report called employee_report.txt
+echo "=== Employee Report ===" > employee_report.txt
+echo "Total Employees: $(wc -l < employees.csv)" >> employee_report.txt
+echo "Average Age: $(awk -F',' '{sum+=$2} END {printf "%.1f", sum/NR}' employees.csv)" >> employee_report.txt
+echo "Average Salary: $(awk -F',' '{sum+=$5} END {printf "%.0f", sum/NR}' employees.csv)" >> employee_report.txt
+echo -e "\nEmployees per City:" >> employee_report.txt
+awk -F',' '{count[$4]++} END {for (city in count) print city ": " count[city]}' employees.csv >> employee_report.txt
+echo -e "\nHighest Salary: $(sort -t',' -k5 -nr employees.csv | head -n1 | cut -d',' -f5)" >> employee_report.txt
+echo "Lowest Salary: $(sort -t',' -k5 -n employees.csv | head -n1 | cut -d',' -f5)" >> employee_report.txt
+
+
+#====================================================================
+#                       TERMINAL EXECUTION LOG
+#====================================================================
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ cat > employees.csv << 'EOF'
+> Ahmed,24,Developer,Cairo,45000
+> Fatma,29,Manager,Alexandria,65000
+> Omar,22,Intern,Giza,15000
+> Nour,31,Engineer,Cairo,55000
+> Youssef,27,Developer,Mansoura,48000
+> Mona,35,Manager,Cairo,70000
+> Karim,23,Designer,Alexandria,35000
+> Layla,28,Engineer,Giza,52000
+> Hassan,26,Developer,Cairo,46000
+> Aya,30,Analyst,Mansoura,41000
+> Mahmoud,33,Manager,Cairo,68000
+> Salma,25,Designer,Alexandria,38000
+> Khaled,29,Engineer,Giza,54000
+> Dina,24,Developer,Mansoura,44000
+> Amr,32,Analyst,Cairo,43000
+> EOF
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ grep "Cairo" employees.csv
+Ahmed,24,Developer,Cairo,45000
+Nour,31,Engineer,Cairo,55000
+Mona,35,Manager,Cairo,70000
+Hassan,26,Developer,Cairo,46000
+Mahmoud,33,Manager,Cairo,68000
+Amr,32,Analyst,Cairo,43000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ grep -c "Developer" employees.csv
+4
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ awk -F',' '{print $1, $5}' employees.csv | head -n 3
+Ahmed 45000
+Fatma 65000
+Omar 15000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ sort -t',' -k5 -nr employees.csv > high_earners.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ head -n 2 high_earners.txt 
+Mona,35,Manager,Cairo,70000
+Mahmoud,33,Manager,Cairo,68000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ awk -F',' '$2 >= 25 && $2 <= 30' employees.csv
+Fatma,29,Manager,Alexandria,65000
+Youssef,27,Developer,Mansoura,48000
+Layla,28,Engineer,Giza,52000
+Hassan,26,Developer,Cairo,46000
+Aya,30,Analyst,Mansoura,41000
+Salma,25,Designer,Alexandria,38000
+Khaled,29,Engineer,Giza,54000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ awk -F',' '{sum += $5} END {print sum/NR}' employees.csv
+48000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ awk -F',' '{count[$4]++} END {for (city in count) print city ": " count[city]}' employees.csv
+Cairo: 6
+Alexandria: 3
+Giza: 3
+Mansoura: 3
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ sort -t',' -k5 -nr employees.csv | awk -F',' '!seen[$3]++'
+Mona,35,Manager,Cairo,70000
+Nour,31,Engineer,Cairo,55000
+Youssef,27,Developer,Mansoura,48000
+Amr,32,Analyst,Cairo,43000
+Salma,25,Designer,Alexandria,38000
+Omar,22,Intern,Giza,15000
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ sed 's/Developer/Software Engineer/g' employees.csv > updated_employees.csv
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ sed '1iName,Age,Position,City,Salary' employees.csv > employees_with_header.csv
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo "=== Employee Report ===" > employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo "Total Employees: $(wc -l < employees.csv)" >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo "Average Age: $(awk -F',' '{sum+=$2} END {printf "%.1f", sum/NR}' employees.csv)" >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo "Average Salary: $(awk -F',' '{sum+=$5} END {printf "%.0f", sum/NR}' employees.csv)" >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo -e "\nEmployees per City:" >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ awk -F',' '{count[$4]++} END {for (city in count) print city ": " count[city]}' employees.csv >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo -e "\nHighest Salary: $(sort -t',' -k5 -nr employees.csv | head -n1 | cut -d',' -f5)" >> employee_report.txt
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ echo "Lowest Salary: $(sort -t',' -k5 -n employees.csv | head -n1 | cut -d',' -f5)" >> employee_report.txt
+
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$ cat employee_report.txt 
+=== Employee Report ===
+Total Employees: 15
+Average Age: 27.9
+Average Salary: 48000
+
+Employees per City:
+Cairo: 6
+Alexandria: 3
+Giza: 3
+Mansoura: 3
+
+Highest Salary: 70000
+Lowest Salary: 15000
+moaz@Linux:~/Desktop/assignments/Linux/day3/lab$
