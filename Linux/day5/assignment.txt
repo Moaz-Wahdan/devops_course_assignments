@@ -1,0 +1,189 @@
+# ==========================================
+# Day 5: Bash Scripting Assignment
+# Nginx Web App Deployment Automation
+# ==========================================
+
+# Below is the complete bash script (deploy_webapp.sh) that fulfills all requirements.
+# It is designed to be idempotent and handles errors gracefully.
+
+#!/bin/bash
+
+# ==========================================
+# Variables Setup
+# ==========================================
+DOMAIN="myapp.local"
+WEB_DIR="/var/www/$DOMAIN"
+NGINX_CONF_AVAILABLE="/etc/nginx/sites-available/$DOMAIN"
+NGINX_CONF_ENABLED="/etc/nginx/sites-enabled/$DOMAIN"
+
+echo -e "\n[INFO] Starting Nginx Web App Deployment Automation..."
+
+# 9. Script Execution: Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "[ERROR] This script must be run as root or with sudo."
+  exit 1
+fi
+
+# ==========================================
+# 1. Directory Setup
+# ==========================================
+if [ -d "$WEB_DIR" ]; then
+    echo "[INFO] Directory $WEB_DIR already exists. Skipping creation."
+else
+    echo "[INFO] Creating directory $WEB_DIR..."
+    mkdir -p "$WEB_DIR" || { echo "[ERROR] Failed to create directory."; exit 1; }
+fi
+
+# ==========================================
+# 2. Web Application Deployment
+# ==========================================
+echo "[INFO] Deploying web application files..."
+cat <<EOF > "$WEB_DIR/index.html"
+<!DOCTYPE html>
+<html>
+<head><title>Welcome to $DOMAIN</title></head>
+<body>
+    <h1>Successfully deployed $DOMAIN!</h1>
+    <p>Automated by DevOps Bash Script</p>
+</body>
+</html>
+EOF
+
+# Verify and set correct file permissions
+chown -R www-data:www-data "$WEB_DIR"
+chmod -R 755 "$WEB_DIR"
+echo "[INFO] File permissions set successfully."
+
+# ==========================================
+# 3. Nginx Configuration
+# ==========================================
+if [ -f "$NGINX_CONF_AVAILABLE" ]; then
+    echo "[INFO] Nginx configuration for $DOMAIN already exists. Skipping creation."
+else
+    echo "[INFO] Creating new Nginx configuration for $DOMAIN..."
+    cat <<EOF > "$NGINX_CONF_AVAILABLE"
+server {
+    listen 80;
+    server_name $DOMAIN;
+    root $WEB_DIR;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+fi
+
+# Create symlink if it doesn't exist
+if [ ! -L "$NGINX_CONF_ENABLED" ]; then
+    echo "[INFO] Enabling Nginx site..."
+    ln -s "$NGINX_CONF_AVAILABLE" "$NGINX_CONF_ENABLED"
+fi
+
+# ==========================================
+# 4. Domain Resolution
+# ==========================================
+if grep -q "$DOMAIN" /etc/hosts; then
+    echo "[INFO] Domain $DOMAIN already exists in /etc/hosts. Preventing duplicate."
+else
+    echo "[INFO] Adding $DOMAIN to /etc/hosts..."
+    echo "127.0.0.1   $DOMAIN" >> /etc/hosts
+fi
+
+# ==========================================
+# 5. Nginx Service Management & Error Handling
+# ==========================================
+echo "[INFO] Testing Nginx configuration syntax..."
+if nginx -t > /dev/null 2>&1; then
+    echo "[INFO] Syntax is OK. Reloading Nginx service..."
+    systemctl reload nginx || { echo "[ERROR] Failed to reload Nginx."; exit 1; }
+else
+    echo "[ERROR] Nginx configuration syntax test failed! Please check your config."
+    exit 1
+fi
+
+# ==========================================
+# 6. Smoke Testing
+# ==========================================
+echo "[INFO] Performing smoke test..."
+# Give Nginx a second to reload
+sleep 2 
+
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://$DOMAIN)
+
+# ==========================================
+# 8. Success Confirmation
+# ==========================================
+if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo -e "\n=================================================="
+    echo "[SUCCESS] Web application deployed successfully!"
+    echo "[SUCCESS] HTTP Status: $HTTP_STATUS (OK)"
+    echo "You can access your application at: http://$DOMAIN"
+    echo "=================================================="
+    exit 0
+else
+    echo -e "\n[ERROR] Smoke test failed. HTTP Status returned: $HTTP_STATUS"
+    exit 1
+fi
+
+
+====================================================================#
+                       TERMINAL EXECUTION LOG#
+====================================================================#
+
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ nano deploy_webapp.sh
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ chmod +x deploy_webapp.sh
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ ./deploy_webapp.sh 
+
+[INFO] Starting Nginx Web App Deployment Automation...
+[ERROR] This script must be run as root or with sudo.
+
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ sudo ./deploy_webapp.sh 
+[sudo] password for moaz: 
+
+[INFO] Starting Nginx Web App Deployment Automation...
+[INFO] Creating directory /var/www/myapp.local...
+[INFO] Deploying web application files...
+[INFO] File permissions set successfully.
+[INFO] Creating new Nginx configuration for myapp.local...
+[INFO] Enabling Nginx site...
+[INFO] Adding myapp.local to /etc/hosts...
+[INFO] Testing Nginx configuration syntax...
+[INFO] Syntax is OK. Reloading Nginx service...
+[INFO] Performing smoke test...
+
+==================================================
+[SUCCESS] Web application deployed successfully!
+[SUCCESS] HTTP Status: 200 (OK)
+You can access your application at: http://myapp.local
+==================================================
+
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ sudo ./deploy_webapp.sh 
+
+[INFO] Starting Nginx Web App Deployment Automation...
+[INFO] Directory /var/www/myapp.local already exists. Skipping creation.
+[INFO] Deploying web application files...
+[INFO] File permissions set successfully.
+[INFO] Nginx configuration for myapp.local already exists. Skipping creation.
+[INFO] Domain myapp.local already exists in /etc/hosts. Preventing duplicate.
+[INFO] Testing Nginx configuration syntax...
+[INFO] Syntax is OK. Reloading Nginx service...
+[INFO] Performing smoke test...
+
+==================================================
+[SUCCESS] Web application deployed successfully!
+[SUCCESS] HTTP Status: 200 (OK)
+You can access your application at: http://myapp.local
+==================================================
+
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$ curl http://myapp.local
+<!DOCTYPE html>
+<html>
+<head><title>Welcome to myapp.local</title></head>
+<body>
+    <h1>Successfully deployed myapp.local!</h1>
+    <p>Automated by DevOps Bash Script</p>
+</body>
+</html>
+moaz@Linux:~/Desktop/assignments/Linux/day5/lab$
