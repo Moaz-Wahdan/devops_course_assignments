@@ -1,0 +1,109 @@
+# ==========================================
+# Day 6: Advanced Topics & Shell Scripting
+# ==========================================
+
+# ------------------------------------------
+# 1. Comprehensive System Monitoring Script
+# ------------------------------------------
+# File: monitor.sh
+#!/bin/bash
+LOG_FILE="system_alerts.log"
+echo "=== System Monitor Run: $(date) ===" >> "$LOG_FILE"
+
+# Check Disk Space (> 80%)
+DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+if [ "$DISK_USAGE" -gt 80 ]; then 
+    echo "[ALERT] High Disk Usage: ${DISK_USAGE}%" >> "$LOG_FILE"
+else
+    echo "[OK] Disk Usage: ${DISK_USAGE}%" >> "$LOG_FILE"
+fi
+
+# Check Memory Usage (> 90%)
+MEM_USAGE=$(free | grep Mem | awk '{printf("%.0f", $3/$2 * 100)}')
+if [ "$MEM_USAGE" -gt 90 ]; then 
+    echo "[ALERT] High Memory Usage: ${MEM_USAGE}%" >> "$LOG_FILE"
+else
+    echo "[OK] Memory Usage: ${MEM_USAGE}%" >> "$LOG_FILE"
+fi
+
+# Check CPU Load
+CPU_LOAD=$(uptime | awk -F'load average:' '{print $2}' | cut -d, -f1 | xargs)
+echo "[INFO] Current CPU Load Average (1 min): $CPU_LOAD" >> "$LOG_FILE"
+
+
+# ------------------------------------------
+# 2. Automated Backup Procedure Script
+# ------------------------------------------
+# File: backup.sh
+#!/bin/bash
+TARGET_DIR=${1:-"/etc"} # Default to /etc if no arg provided
+BACKUP_DIR="./backups"
+mkdir -p "$BACKUP_DIR"
+
+DATE=$(date +%Y%m%d_%H%M%S)
+DAY_OF_WEEK=$(date +%u)
+
+# Full backup on Sunday (7), Incremental otherwise
+if [ "$DAY_OF_WEEK" -eq 7 ]; then
+    echo "[INFO] Running Weekly Full Backup for $TARGET_DIR..."
+    tar -czf "$BACKUP_DIR/full_backup_$DATE.tar.gz" "$TARGET_DIR" 2>/dev/null
+    echo "Success: $BACKUP_DIR/full_backup_$DATE.tar.gz"
+else
+    echo "[INFO] Running Daily Incremental Backup for $TARGET_DIR..."
+    tar -czf "$BACKUP_DIR/inc_backup_$DATE.tar.gz" --newer-mtime="1 day ago" "$TARGET_DIR" 2>/dev/null
+    echo "Success: $BACKUP_DIR/inc_backup_$DATE.tar.gz"
+fi
+
+# Cleanup old backups (keep for 30 days)
+find "$BACKUP_DIR" -type f -name "*.tar.gz" -mtime +30 -delete
+
+
+# ------------------------------------------
+# 3. Cron Job Scheduling (Documentation)
+# ------------------------------------------
+# To automate the above scripts, run 'crontab -e' and add:
+#
+# Run monitor.sh every 5 minutes:
+# */5 * * * * /home/moaz/Desktop/assignments/Linux/day6/lab/monitor.sh
+#
+# Run backup.sh every day at 2:00 AM:
+# 0 2 * * * /home/moaz/Desktop/assignments/Linux/day6/lab/backup.sh /var/log
+
+
+# ------------------------------------------
+# 4. Troubleshooting Guide
+# ------------------------------------------
+# File: troubleshoot_guide.md
+# High CPU: Use `top -o %CPU` or `htop`. Kill with `kill -9 <PID>`.
+# No Disk Space: Find large files using `find / -type f -size +500M`. Clear `/var/log`.
+# Network Down: Check `ip a`, test with `ping 8.8.8.8`, restart with `systemctl restart networking`.
+
+
+====================================================================#
+                       TERMINAL EXECUTION LOG#
+====================================================================#
+
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ nano monitor.sh
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ nano backup.sh
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ chmod +x monitor.sh backup.sh
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ ./monitor.sh 
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ cat system_alerts.log 
+=== System Monitor Run: Sun Mar 15 16:45:12 EET 2026 ===
+[OK] Disk Usage: 46%
+[OK] Memory Usage: 32%
+[INFO] Current CPU Load Average (1 min): 0.15
+
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ ./backup.sh /var/log
+[INFO] Running Weekly Full Backup for /var/log...
+tar: Removing leading `/' from member names
+Success: ./backups/full_backup_20260315_164530.tar.gz
+
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ ls -lh backups/
+total 4.2M
+-rw-rw-r-- 1 moaz moaz 4.2M Mar 15 16:45 full_backup_20260315_164530.tar.gz
+
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$ crontab -l
+# m h  dom mon dow   command
+*/5 * * * * /home/moaz/Desktop/assignments/Linux/day6/lab/monitor.sh
+0 2 * * * /home/moaz/Desktop/assignments/Linux/day6/lab/backup.sh /var/log
+moaz@Linux:~/Desktop/assignments/Linux/day6/lab$
