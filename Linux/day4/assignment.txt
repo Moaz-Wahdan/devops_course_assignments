@@ -1,0 +1,187 @@
+# ==========================================
+# Day 4: System Administration Assignment
+# ==========================================
+
+# Exercise 1: User Management
+# ------------------------------------------
+# 1. Create a new user called testuser
+sudo adduser testuser
+
+# 2. Set a password for the user (Handled interactively by adduser in Ubuntu)
+# Or manually: sudo passwd testuser
+
+# 3. Add the user to the sudo group
+sudo usermod -aG sudo testuser
+
+# 4. Switch to the user and test sudo access
+su - testuser
+sudo whoami
+exit
+
+# 5. Lock and unlock the account
+sudo passwd -l testuser  # Lock
+sudo passwd -u testuser  # Unlock
+
+
+# Exercise 2: Process Management
+# ------------------------------------------
+# 1. Start a long-running process
+sleep 300
+
+# 2 & 3. Suspend it with Ctrl + Z, then find PID and resume
+# (Press Ctrl + Z)
+bg              # Resume in background
+ps aux | grep sleep
+
+# 5. Kill the process (Replace 12345 with actual PID)
+kill -9 12345
+
+
+# Exercise 3: Service Management
+# ------------------------------------------
+# 1. Check the status of the SSH service
+systemctl status ssh
+
+# 2. View the SSH service logs
+journalctl -u ssh
+
+# 3. Restart the SSH service
+sudo systemctl restart ssh
+
+# 4. Check if it's enabled to start on boot
+systemctl is-enabled ssh
+
+
+# Exercise 4: Networking
+# ------------------------------------------
+# 1. Check your network interfaces
+ip a
+
+# 2. Test connectivity to google.com
+ping -c 4 google.com
+
+# 3. Check what's listening on port 22 (SSH)
+sudo ss -tulpn | grep :22
+
+# 4. View your routing table
+ip route
+
+
+# Exercise 5: Log Analysis
+# ------------------------------------------
+# 1. View the last 50 lines of the system log
+sudo tail -n 50 /var/log/syslog
+
+# 2. Search for "error" messages in the log
+sudo grep -i "error" /var/log/syslog
+
+# 3. Check the authentication log for failed login attempts
+sudo grep -i "failed" /var/log/auth.log
+
+# 4. Use journalctl to view recent system messages
+journalctl --since "1 hour ago"
+
+
+# Exercise 6: Firewall Configuration
+# ------------------------------------------
+# 1. Check your current firewall status
+sudo ufw status
+
+# 2. Allow SSH access (port 22)
+sudo ufw allow ssh
+
+# 3. Allow HTTP access (port 80)
+sudo ufw allow http
+
+# 4. Block a specific IP address
+sudo ufw deny from 192.168.1.100
+
+# 5. List all firewall rules
+sudo ufw status numbered
+
+
+====================================================================#
+                       TERMINAL EXECUTION LOG#
+====================================================================#
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo adduser testuser
+Adding user `testuser' ...
+Adding new group `testuser' (1005) ...
+Adding new user `testuser' (1005) with group `testuser' ...
+Creating home directory `/home/testuser' ...
+Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for testuser
+	Full Name []: Test User
+	Room Number []: 
+	Work Phone []: 
+	Home Phone []: 
+	Other []: 
+Is the information correct? [Y/n] Y
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo usermod -aG sudo testuser
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ su - testuser
+Password: 
+testuser@Linux:~$ sudo whoami
+[sudo] password for testuser: 
+root
+testuser@Linux:~$ exit
+logout
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo passwd -l testuser
+passwd: password expiry information changed.
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo passwd -u testuser
+passwd: password expiry information changed.
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sleep 300
+^Z
+[1]+  Stopped                 sleep 300
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ bg
+[1]+ sleep 300 &
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ ps aux | grep sleep
+moaz        4821  0.0  0.0   5228   712 pts/1    S    16:05   0:00 sleep 300
+moaz        4823  0.0  0.0   6480  2276 pts/1    S+   16:05   0:00 grep --color=auto sleep
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ kill -9 4821
+[1]+  Killed                  sleep 300
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ systemctl status ssh | head -n 5
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sun 2026-03-15 10:15:22 EET; 5h 50min ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ systemctl is-enabled ssh
+enabled
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ ip a | grep enp0s3
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ ping -c 2 google.com
+PING google.com (142.250.185.110) 56(84) bytes of data.
+64 bytes from fra16s52-in-f14.1e100.net (142.250.185.110): icmp_seq=1 ttl=115 time=48.2 ms
+64 bytes from fra16s52-in-f14.1e100.net (142.250.185.110): icmp_seq=2 ttl=115 time=47.9 ms
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo ss -tulpn | grep :22
+tcp   LISTEN 0      128          0.0.0.0:22        0.0.0.0:* users:(("sshd",pid=855,fd=3))
+tcp   LISTEN 0      128             [::]:22           [::]:* users:(("sshd",pid=855,fd=4))
+
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo ufw allow ssh
+Rule added
+Rule added (v6)
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo ufw allow http
+Rule added
+Rule added (v6)
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo ufw deny from 192.168.1.100
+Rule added
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere
+[ 2] 80/tcp                     ALLOW IN    Anywhere
+[ 3] Anywhere                   DENY IN     192.168.1.100
+[ 4] 22/tcp (v6)                ALLOW IN    Anywhere (v6)
+[ 5] 80/tcp (v6)                ALLOW IN    Anywhere (v6)
+moaz@Linux:~/Desktop/assignments/Linux/day4/lab$

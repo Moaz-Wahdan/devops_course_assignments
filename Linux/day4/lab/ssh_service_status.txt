@@ -1,0 +1,11 @@
+enabled
+○ ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/usr/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: inactive (dead) since Sun 2026-03-15 13:03:36 UTC; 58min ago
+   Duration: 55min 53.334s
+TriggeredBy: ● ssh.socket
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+   Main PID: 1411 (code=exited, status=0/SUCCESS)
+        CPU: 22ms
+
